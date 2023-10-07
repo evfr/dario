@@ -19,3 +19,5 @@
 
     I didn't use mongoose schema in this project because the contacts.csv can be huge and using mongoose can be 
     resource consuming in this scenario.
+
+3. please run "npm i" before testing. The "dist" direcory is included here. no need to tun "npx tsc".

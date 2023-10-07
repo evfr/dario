@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Identity Verification</title>
+    <style>
+        form-container {
+            display: flex;
+            justify-content: space-between; /* Aligns elements horizontally */
+        }
+
+        label {
+            display: inline-block;
+            width: 100px; /* Adjust the width as needed for alignment */
+            text-align: right; /* Optional: Right-align labels */
+            margin-right: 10px; /* Optional: Add spacing between label and input */
+            margin-bottom: 10px;
+        }
+        
+        input {
+            display: inline-block;
+            width: 200px; /* Adjust the width as needed */
+        }
+
+        .response {
+            margin-top: 30px;
+            display: inline-block;
+        }
+    </style>
+
+    <!-- Inline JavaScript code -->
+    <script>
+        // Function to validate the name input
+        function validateName() {
+            const nameValue = document.getElementById('name').value.trim();
+            if (nameValue === '') {
+                alert('Please enter your name.');
+                return false;
+            }
+
+            const phoneValue = document.getElementById('phone').value.trim();
+            const phonePattern = /^(?:\+\d{1,3})?\d{10}(?:$|-\d{1,4}$)/;
+            if (!phonePattern.test(phoneValue)) {
+                alert('Phone number is incorrect.');
+                return false;
+            };
+
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            const emailValue = document.getElementById('email').value.trim();
+            if (!emailPattern.test(emailValue)) {
+                alert('Email is incorrect.');
+                return false;
+            };
+
+            return true;
+        }
+
+        // Function to handle form submission
+        function validateForm(event) {
+            // Call individual validation functions for each input
+            if (!validateName()) {
+                event.preventDefault();
+                return;
+            }
+
+            if (validateName()) {
+                event.preventDefault();
+
+                formData = JSON.stringify({
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    id: document.getElementById('id').value,
+                });
+
+                fetch("/submit", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: formData,
+                })
+                .then((response) => response.text())//{
+                .then((data) => {
+                    const parsedData = JSON.parse(data);
+                    if (parsedData.message) {
+                        document.getElementById("response-container").innerHTML = `Error: ${parsedData.message}`
+                    } else {
+                        document.getElementById("response-container").innerHTML = parsedData.eligibleDevices;
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                });
+            }
+        }
+
+    </script>
+</head>
+    <body>
+        <h1>User Identity Verification</h1>
+        <form class="form" id="verification-form" method="POST" action="/submit">
+            <div class="form-group"></div>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone:</label>
+                <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" required>
+            </div>
+            <div class="form-group">
+                <label for="id">Id:</label>
+                <input type="text" id="id" name="id" pattern="[0-9]{9}" required>
+            </div>
+            <div class="button-container">
+                <button type="button" id="submitButton" name="submitButton" onclick="validateForm(event);">Submit</button>
+            </div>
+        </form>
+        <div class="response" id="response-container"></div>
+    </body>
+
+</html>
